@@ -22,6 +22,7 @@ public:
     bool ShouldClose();
     void Destroy();
     void ResizeWindow(int width, int height);
+    bool ShouldReload();
     Float2 GetMousePosition();
 
     // getters

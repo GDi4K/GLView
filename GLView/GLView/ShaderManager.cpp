@@ -1,5 +1,14 @@
 ﻿#include "ShaderManager.h"
 
+int StringToWString(std::wstring &ws, const std::string &s)
+{
+    std::wstring wsTmp(s.begin(), s.end());
+
+    ws = wsTmp;
+
+    return 0;
+}
+
 ShaderManager::ShaderManager()
 {
     vertexShaderCode = ""
@@ -72,6 +81,29 @@ bool ShaderManager::Compile()
     return true;
 }
 
+void ShaderManager::Recompile()
+{
+    if (recompiling) return;
+    recompiling = true;
+    
+    std::cout << "Recompiling" << std::endl;
+    
+    if (!vertexShaderCodePath.empty())
+    {
+        LoadVertexShader(vertexShaderCodePath);
+    }
+
+    if(!fragmentShaderCodePath.empty())
+    {
+        LoadFragmentShader(fragmentShaderCodePath);
+    }
+    
+    glDeleteProgram(shaderProgram);
+    Compile();
+    
+    recompiling = false;
+}
+
 void ShaderManager::Use()
 {
     glUseProgram(shaderProgram);
@@ -92,12 +124,15 @@ bool ShaderManager::ReadFile(std::string path, std::string& content)
     {
         return false;
     }
+
+    file.close();
     
     return true;
 }
 
 bool ShaderManager::LoadVertexShader(std::string path)
 {
+    vertexShaderCodePath = path;
     std::cout << "Loading vertex shader at: " << path << std::endl;
     vertexShaderCode = "";
 
@@ -106,12 +141,13 @@ bool ShaderManager::LoadVertexShader(std::string path)
         std::cerr << "Reading shader file failed!" << std::endl;
         return false;
     }
-
+    
     return true;
 }
 
 bool ShaderManager::LoadFragmentShader(std::string path)
 {
+    fragmentShaderCodePath = path;
     std::cout << "Loading fragment shader at: " << path << std::endl;
     fragmentShaderCode = "";
 

@@ -12,6 +12,9 @@ private:
     GLuint CompileShader(GLenum type, std::string code);
     std::string vertexShaderCode;
     std::string fragmentShaderCode;
+    std::string vertexShaderCodePath = "";
+    std::string fragmentShaderCodePath = "";
+    bool recompiling = false;
 
     bool ReadFile(std::string path, std::string &content);
 
@@ -19,6 +22,7 @@ public:
     ShaderManager();
     void Destroy();
     bool Compile();
+    void Recompile();
     void Use();
     bool LoadVertexShader(std::string path);
     bool LoadFragmentShader(std::string path);

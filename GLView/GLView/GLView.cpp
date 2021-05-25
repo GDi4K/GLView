@@ -1,18 +1,30 @@
 #include <iostream>
+#include <filesystem>
 
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 #include "WindowManager.h"
 #include "ShaderManager.h"
 
+namespace fs = std::experimental::filesystem;
+
 int main(int argc, char* argv[])
-{
+{    
     WindowManager* windowManager = WindowManager::Get();
     if(!windowManager->Init(800, 600)) return -1;
 
     ShaderManager shaderManager;
-    if(!shaderManager.LoadVertexShader("D:\\Tmp\\vertex.glsl")) return -1;
-    if(!shaderManager.LoadFragmentShader("D:\\Tmp\\fragment.glsl")) return -1;
+    if (argc == 2)
+    {
+        if(!shaderManager.LoadFragmentShader(argv[1])) return -1;
+    } else if (argc == 3)
+    {
+        if(!shaderManager.LoadFragmentShader(argv[1])) return -1;
+        if(!shaderManager.LoadVertexShader(argv[2])) return -1;
+    }
+
+    //if(!shaderManager.LoadVertexShader("D:\\Tmp\\vertex.glsl")) return -1;
+    //if(!shaderManager.LoadFragmentShader("D:\\Tmp\\fragment.glsl")) return -1;
     if(!shaderManager.Compile()) return -1;
 
     float vertices[] = {
@@ -67,6 +79,11 @@ int main(int argc, char* argv[])
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
         
         windowManager->UpdateWindow();
+
+        if(windowManager->ShouldReload())
+        {
+            shaderManager.Recompile();
+        }
     }
     return 0;
 }

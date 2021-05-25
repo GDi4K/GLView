@@ -1,5 +1,7 @@
 ﻿#include "WindowManager.h"
 
+#include <windows.h>
+
 WindowManager* WindowManager::current = nullptr;
 
 WindowManager::~WindowManager()
@@ -17,6 +19,11 @@ void WindowManager::ResizeWindow(int w, int h)
    width = w;
    height = h;
    glViewport(0, 0, w, h);
+}
+
+bool WindowManager::ShouldReload()
+{
+   return glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS;
 }
 
 Float2 WindowManager::GetMousePosition()
