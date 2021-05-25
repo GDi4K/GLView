@@ -40,7 +40,7 @@ GLuint ShaderManager::CompileShader(GLenum type, std::string code)
     return shader;
 }
 
-bool ShaderManager::Load()
+bool ShaderManager::Compile()
 {
     const auto vertexShader = CompileShader(GL_VERTEX_SHADER, vertexShaderCode);
     const auto fragmentShader = CompileShader(GL_FRAGMENT_SHADER, fragmentShaderCode);
@@ -75,6 +75,53 @@ bool ShaderManager::Load()
 void ShaderManager::Use()
 {
     glUseProgram(shaderProgram);
+}
+
+bool ShaderManager::ReadFile(std::string path, std::string& content)
+{
+    std::ifstream file(path);
+    std::string line;
+    
+    if (file.is_open())
+    {
+        while (std::getline(file, line))
+        {
+            content += line + "\n";
+        }
+    } else
+    {
+        return false;
+    }
+    
+    return true;
+}
+
+bool ShaderManager::LoadVertexShader(std::string path)
+{
+    std::cout << "Loading vertex shader at: " << path << std::endl;
+    vertexShaderCode = "";
+
+    if(!ReadFile(path, vertexShaderCode))
+    {
+        std::cerr << "Reading shader file failed!" << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
+bool ShaderManager::LoadFragmentShader(std::string path)
+{
+    std::cout << "Loading fragment shader at: " << path << std::endl;
+    fragmentShaderCode = "";
+
+    if(!ReadFile(path, fragmentShaderCode))
+    {
+        std::cerr << "Reading shader file failed!" << std::endl;
+        return false;
+    }
+
+    return true;
 }
 
 void ShaderManager::Destroy()

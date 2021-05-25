@@ -1,5 +1,7 @@
 ﻿#pragma once
 #include <iostream>
+#include <string>
+#include <fstream>
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 
@@ -11,9 +13,13 @@ private:
     std::string vertexShaderCode;
     std::string fragmentShaderCode;
 
+    bool ReadFile(std::string path, std::string &content);
+
 public:
     ShaderManager();
     void Destroy();
-    bool Load();
+    bool Compile();
     void Use();
+    bool LoadVertexShader(std::string path);
+    bool LoadFragmentShader(std::string path);
 };

@@ -11,7 +11,9 @@ int main(int argc, char* argv[])
     if(!windowManager.Init(800, 600)) return -1;
 
     ShaderManager shaderManager;
-    if(!shaderManager.Load()) return -1;
+    if(!shaderManager.LoadVertexShader("D:\\Tmp\\vertex.glsl")) return -1;
+    if(!shaderManager.LoadFragmentShader("D:\\Tmp\\fragment.glsl")) return -1;
+    if(!shaderManager.Compile()) return -1;
 
     float vertices[] = {
         -0.5f, 0.5f, 0.0f, // top-left
