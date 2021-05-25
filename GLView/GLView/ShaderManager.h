@@ -7,9 +7,12 @@ class ShaderManager
 {
 private:
     GLuint shaderProgram;
-    GLuint CompileShader(GLenum type, char* code);
+    GLuint CompileShader(GLenum type, std::string code);
+    std::string vertexShaderCode;
+    std::string fragmentShaderCode;
 
 public:
+    ShaderManager();
     void Destroy();
     bool Load();
     void Use();

@@ -5,7 +5,6 @@
 #include "WindowManager.h"
 #include "ShaderManager.h"
 
-
 int main(int argc, char* argv[])
 {
     WindowManager windowManager;

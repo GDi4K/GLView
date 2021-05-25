@@ -1,6 +1,8 @@
 ﻿#include "ShaderManager.h"
 
-char vertexShaderCode[] = ""
+ShaderManager::ShaderManager()
+{
+    vertexShaderCode = ""
         "#version 330 core\n"
         "layout (location = 0) in vec3 pos;\n"
         "void main() {\n"
@@ -8,7 +10,7 @@ char vertexShaderCode[] = ""
         "};\n"
         "";
 
-char fragmentShaderCode[] = ""
+    fragmentShaderCode = ""
         "#version 330 core\n"
         "out vec4 FragColor;\n"
         "void main() {\n"
@@ -16,11 +18,13 @@ char fragmentShaderCode[] = ""
         "   FragColor = vec4(color, 1.0);\n"
         "}\n"
         "";
+}
 
-GLuint ShaderManager::CompileShader(GLenum type, char* code)
+GLuint ShaderManager::CompileShader(GLenum type, std::string code)
 {
+    const char* ccode = code.c_str();
     auto shader = glCreateShader(type);
-    glShaderSource(shader, 1, &code, nullptr);
+    glShaderSource(shader, 1, &ccode, nullptr);
     glCompileShader(shader);
 
     int success;
