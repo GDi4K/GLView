@@ -7,8 +7,8 @@
 
 int main(int argc, char* argv[])
 {
-    WindowManager windowManager;
-    if(!windowManager.Init(800, 600)) return -1;
+    WindowManager* windowManager = WindowManager::Get();
+    if(!windowManager->Init(800, 600)) return -1;
 
     ShaderManager shaderManager;
     if(!shaderManager.LoadVertexShader("D:\\Tmp\\vertex.glsl")) return -1;
@@ -16,10 +16,10 @@ int main(int argc, char* argv[])
     if(!shaderManager.Compile()) return -1;
 
     float vertices[] = {
-        -0.5f, 0.5f, 0.0f, // top-left
-        0.5f, 0.5f, 0.0f, // top-right
-        0.5f, -0.5f, 0.0f, // bottom-right
-        -0.5f, -0.5f, 0.0f // bottom-left
+        -1.0f, 1.0f, 0.0f, // top-left
+        1.0f, 1.0f, 0.0f, // top-right
+        1.0f, -1.0f, 0.0f, // bottom-right
+        -1.0f, -1.0f, 0.0f // bottom-left
     };
 
     GLuint indices[] = {
@@ -49,15 +49,24 @@ int main(int argc, char* argv[])
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    while(!windowManager.ShouldClose())
+    while(!windowManager->ShouldClose())
     {
-        windowManager.ResetWindow();
+        windowManager->ResetWindow();
         shaderManager.Use();
 
+        // Assign uniforms
+        shaderManager.SetUniformFloat("u_time", glfwGetTime());
+
+        const auto res = windowManager->GetResolution();
+        shaderManager.SetUniformFloat2("u_resolution", res.x, res.y);
+
+        const auto mousePos = windowManager->GetMousePosition();
+        shaderManager.SetUniformFloat2("u_mouse", mousePos.x, mousePos.y);
+        
         glBindVertexArray(VBO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
         
-        windowManager.UpdateWindow();
+        windowManager->UpdateWindow();
     }
     return 0;
 }

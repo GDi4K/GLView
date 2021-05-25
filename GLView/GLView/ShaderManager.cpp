@@ -124,6 +124,51 @@ bool ShaderManager::LoadFragmentShader(std::string path)
     return true;
 }
 
+bool ShaderManager::SetUniformInt(std::string key, int value)
+{
+    const auto location = glGetUniformLocation(shaderProgram, key.c_str());
+    if (location == -1) return false;
+    
+    glUniform1i(location, value);
+    return true;
+}
+
+bool ShaderManager::SetUniformFloat(std::string key, float value)
+{
+    const auto location = glGetUniformLocation(shaderProgram, key.c_str());
+    if (location == -1) return false;
+    
+    glUniform1f(location, value);
+    return true;
+}
+
+bool ShaderManager::SetUniformFloat2(std::string key, float v1, float v2)
+{
+    const auto location = glGetUniformLocation(shaderProgram, key.c_str());
+    if (location == -1) return false;
+    
+    glUniform2f(location, v1, v2);
+    return true;
+}
+
+bool ShaderManager::SetUniformFloat3(std::string key, float v1, float v2, float v3)
+{
+    const auto location = glGetUniformLocation(shaderProgram, key.c_str());
+    if (location == -1) return false;
+    
+    glUniform3f(location, v1, v2, v3);
+    return true;
+}
+
+bool ShaderManager::SetUniformFloat4(std::string key, float v1, float v2, float v3, float v4)
+{
+    const auto location = glGetUniformLocation(shaderProgram, key.c_str());
+    if (location == -1) return false;
+    
+    glUniform4f(location, v1, v2, v3, v4);
+    return true;
+}
+
 void ShaderManager::Destroy()
 {
     glDeleteShader(shaderProgram);

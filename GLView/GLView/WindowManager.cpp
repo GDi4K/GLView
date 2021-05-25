@@ -1,5 +1,7 @@
 ﻿#include "WindowManager.h"
 
+WindowManager* WindowManager::current = nullptr;
+
 WindowManager::~WindowManager()
 {
    Destroy();
@@ -10,8 +12,41 @@ void WindowManager::Destroy()
    glfwTerminate();
 }
 
-bool WindowManager::Init(int width, int height)
+void WindowManager::ResizeWindow(int w, int h)
 {
+   width = w;
+   height = h;
+   glViewport(0, 0, w, h);
+}
+
+Float2 WindowManager::GetMousePosition()
+{
+   double x, y;
+   glfwGetCursorPos(window, &x, &y);
+   // in GLFW origin is the top-left, but on OpenGL it's bottom left
+   // So, we have to correct the y coordinates like this
+   return { static_cast<float>(x), static_cast<float>(height - y) };
+}
+
+WindowManager* WindowManager::Get()
+{
+   if (!current)
+   {
+      WindowManager::current = new WindowManager();
+   }
+
+   return WindowManager::current;
+}
+
+void WindowManager::OnResizeWindow(GLFWwindow* window, int w, int h)
+{
+   WindowManager::Get()->ResizeWindow(w, h);
+}
+
+bool WindowManager::Init(int w, int h)
+{
+   width = w;
+   height = w;
    glfwInit();
    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -30,6 +65,9 @@ bool WindowManager::Init(int width, int height)
       std::cerr << "Error when loading GLAD" << std::endl;
       return false;
    }
+
+   glfwSetWindowSizeCallback(window, OnResizeWindow);
+
    return true; 
 }
 
