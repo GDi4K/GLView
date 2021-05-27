@@ -7,6 +7,8 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "imfilebrowser.h"
+#include "ShaderManager.h"
 
 class WindowManager
 {
@@ -16,6 +18,9 @@ private:
     int width = 0;
     int height = 0;
     bool imguiUpdated = false;
+    ImGui::FileBrowser fileDialog;
+    bool startSelectingShaders = false;
+    bool isVertexShaderSelected = false;
 
 public:
     // methods
@@ -30,6 +35,8 @@ public:
     Float2 GetMousePosition();
     void InitImGui();
     void ShowError(std::string title, std::string message);
+    void SelectShader(ShaderManager &shaderManager);
+    bool ShouldSelectShaders();
 
     // getters
     Int2 GetResolution()

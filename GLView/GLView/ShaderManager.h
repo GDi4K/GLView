@@ -42,4 +42,12 @@ public:
     {
         return compilerErrors;
     }
+    std::string GetFragmentShaderPath()
+    {
+        return fragmentShaderCodePath;
+    }
+    std::string GetVertexShaderPath()
+    {
+        return vertexShaderCodePath;
+    }
 };

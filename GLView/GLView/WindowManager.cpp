@@ -1,5 +1,6 @@
 ﻿#include "WindowManager.h"
 
+#include "cwalk.h"
 
 WindowManager* WindowManager::current = nullptr;
 
@@ -66,6 +67,78 @@ void WindowManager::ShowError(std::string title, std::string message)
    ImGui::Text(message.c_str());
    ImGui::End();
    ImGui::Render();
+}
+
+
+bool WindowManager::ShouldSelectShaders()
+{
+   if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+   {
+      startSelectingShaders = true;
+      return true;
+   }
+
+   return startSelectingShaders;
+}
+
+void WindowManager::SelectShader(ShaderManager &shaderManager)
+{
+   imguiUpdated = true;
+   const ImGuiViewport* viewport = ImGui::GetMainViewport();
+   ImGui::SetNextWindowPos(viewport->Pos);
+   ImGui::SetNextWindowSize(viewport->Size);
+
+   ImGui::NewFrame();
+   if(ImGui::Begin("Select Shaders"))
+   {
+      if(ImGui::Button("Select Fragment Shader"))
+      {
+         auto currPath = shaderManager.GetFragmentShaderPath();
+         size_t dirStopAt;
+         cwk_path_get_dirname(currPath.c_str(), &dirStopAt);
+         fileDialog.SetPwd(currPath.substr(0, dirStopAt));
+         isVertexShaderSelected = false;
+         fileDialog.Open();
+      }
+
+      if(ImGui::Button("Select Vertex Shader"))
+      {
+         auto currPath = shaderManager.GetVertexShaderPath();
+         size_t dirStopAt;
+         cwk_path_get_dirname(currPath.c_str(), &dirStopAt);
+         fileDialog.SetPwd(currPath.substr(0, dirStopAt));
+         fileDialog.Open();
+         isVertexShaderSelected = true;
+         fileDialog.Open();
+      }
+
+      if (ImGui::Button("Cancel"))
+      {
+         startSelectingShaders = false;
+      }
+   }
+   ImGui::End();
+   
+   fileDialog.Display();
+
+   if(fileDialog.HasSelected())
+   {
+      const auto selectedFile = fileDialog.GetSelected().string();
+      if (isVertexShaderSelected)
+      {
+         shaderManager.LoadVertexShader(selectedFile);
+      } else
+      {
+         shaderManager.LoadFragmentShader(selectedFile);
+      }
+
+      shaderManager.Recompile();
+      startSelectingShaders = false;
+      fileDialog.ClearSelected();
+   }
+   
+   ImGui::Render();
+   
 }
 
 WindowManager* WindowManager::Get()

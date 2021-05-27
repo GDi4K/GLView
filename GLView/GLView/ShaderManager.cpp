@@ -56,10 +56,8 @@ bool ShaderManager::Compile()
 {
     const auto vertexShader = CompileShader(GL_VERTEX_SHADER, vertexShaderCode);
     const auto fragmentShader = CompileShader(GL_FRAGMENT_SHADER, fragmentShaderCode);
-    std::cout << "VVV FAILED" << fragmentShader << std::endl;
     if (vertexShader == 0 || fragmentShader == 0)
     {
-        std::cout << "CCCC FAILED" << std::endl;
         return false;
     }
 

@@ -15,17 +15,17 @@ int main(int argc, char* argv[])
     if(!windowManager->Init(1000, 1000)) return -1;
 
     ShaderManager shaderManager;
-    // if (argc == 2)
-    // {
-    //     if(!shaderManager.LoadFragmentShader(argv[1])) return -1;
-    // } else if (argc == 3)
-    // {
-    //     if(!shaderManager.LoadFragmentShader(argv[1])) return -1;
-    //     if(!shaderManager.LoadVertexShader(argv[2])) return -1;
-    // }
+    if (argc == 2)
+    {
+        if(!shaderManager.LoadFragmentShader(argv[1])) return -1;
+    } else if (argc == 3)
+    {
+        if(!shaderManager.LoadFragmentShader(argv[1])) return -1;
+        if(!shaderManager.LoadVertexShader(argv[2])) return -1;
+    }
 
-    shaderManager.LoadVertexShader("D:\\Tmp\\vertex.glsl");
-    shaderManager.LoadFragmentShader("D:\\Tmp\\fragment.glsl");
+    // shaderManager.LoadVertexShader("D:\\Tmp\\vertex.glsl");
+    // shaderManager.LoadFragmentShader("D:\\Tmp\\fragment.glsl");
 
     shaderManager.Recompile();
 
@@ -64,6 +64,9 @@ int main(int argc, char* argv[])
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     windowManager->InitImGui();
+    ImGui::FileBrowser fileDialog;
+    //fileDialog.SetTitle("title");
+    //fileDialog.SetTypeFilters({ ".h", ".cpp" });
 
     while(!windowManager->ShouldClose())
     {
@@ -91,14 +94,18 @@ int main(int argc, char* argv[])
             glBindVertexArray(VBO);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);   
         }
-
         
-        windowManager->UpdateWindow();
-
-        if(windowManager->ShouldReload())
+        if (windowManager->ShouldSelectShaders())
+        {
+            windowManager->SelectShader(shaderManager);
+        } else if(windowManager->ShouldReload())
         {
             shaderManager.Recompile();
         }
+        
+        windowManager->UpdateWindow();
+
+        
     }
     
     return 0;
