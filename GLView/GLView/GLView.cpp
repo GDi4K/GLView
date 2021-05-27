@@ -6,6 +6,7 @@
 #include "WindowManager.h"
 #include "ShaderManager.h"
 
+
 namespace fs = std::experimental::filesystem;
 
 int main(int argc, char* argv[])
@@ -14,19 +15,19 @@ int main(int argc, char* argv[])
     if(!windowManager->Init(1000, 1000)) return -1;
 
     ShaderManager shaderManager;
-    if (argc == 2)
-    {
-        if(!shaderManager.LoadFragmentShader(argv[1])) return -1;
-    } else if (argc == 3)
-    {
-        if(!shaderManager.LoadFragmentShader(argv[1])) return -1;
-        if(!shaderManager.LoadVertexShader(argv[2])) return -1;
-    }
+    // if (argc == 2)
+    // {
+    //     if(!shaderManager.LoadFragmentShader(argv[1])) return -1;
+    // } else if (argc == 3)
+    // {
+    //     if(!shaderManager.LoadFragmentShader(argv[1])) return -1;
+    //     if(!shaderManager.LoadVertexShader(argv[2])) return -1;
+    // }
 
-    // if(!shaderManager.LoadVertexShader("D:\\Tmp\\vertex.glsl")) return -1;
-    // if(!shaderManager.LoadFragmentShader("D:\\Tmp\\fragment.glsl")) return -1;
+    shaderManager.LoadVertexShader("D:\\Tmp\\vertex.glsl");
+    shaderManager.LoadFragmentShader("D:\\Tmp\\fragment.glsl");
 
-    if(!shaderManager.Compile()) return -1;
+    shaderManager.Recompile();
 
     float vertices[] = {
         -1.0f, 1.0f, 0.0f, // top-left
@@ -62,11 +63,20 @@ int main(int argc, char* argv[])
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+    windowManager->InitImGui();
+
     while(!windowManager->ShouldClose())
     {
         windowManager->ResetWindow();
 
-        if (!shaderManager.IsCompilingFailed())
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+
+        if (shaderManager.IsCompilingFailed())
+        {
+            windowManager->ShowError("Shader Compiler Error", shaderManager.GetCompilingErrors().c_str());
+            
+        } else
         {
             shaderManager.Use();
             // Assign uniforms
@@ -81,6 +91,7 @@ int main(int argc, char* argv[])
             glBindVertexArray(VBO);
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);   
         }
+
         
         windowManager->UpdateWindow();
 

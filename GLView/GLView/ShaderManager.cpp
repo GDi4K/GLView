@@ -1,6 +1,5 @@
 ﻿#include "ShaderManager.h"
 #include <regex>
-
 #include "cwalk.h"
 
 int StringToWString(std::wstring &ws, const std::string &s)
@@ -45,6 +44,7 @@ GLuint ShaderManager::CompileShader(GLenum type, std::string code)
     {
         char log[512];
         glGetShaderInfoLog(shader, sizeof(log), nullptr, log);
+        compilerErrors += std::string(log) + "\n";
         std::cerr << "Shader compilation failed: " << log << std::endl;
         return 0;
     }
@@ -56,9 +56,10 @@ bool ShaderManager::Compile()
 {
     const auto vertexShader = CompileShader(GL_VERTEX_SHADER, vertexShaderCode);
     const auto fragmentShader = CompileShader(GL_FRAGMENT_SHADER, fragmentShaderCode);
-    if (!vertexShader || !fragmentShader)
+    std::cout << "VVV FAILED" << fragmentShader << std::endl;
+    if (vertexShader == 0 || fragmentShader == 0)
     {
-        compilingFailed = true;
+        std::cout << "CCCC FAILED" << std::endl;
         return false;
     }
 
@@ -75,12 +76,11 @@ bool ShaderManager::Compile()
     {
         char log[512];
         glGetProgramInfoLog(shaderProgram, sizeof(log), nullptr, log);
+        compilerErrors += std::string("Shader linking failed") + "\n";
         std::cerr << "Shader linking failed: " << std::endl;
-        compilingFailed = true;
         return false;
     }
 
-    compilingFailed = false;
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
     
@@ -91,22 +91,33 @@ void ShaderManager::Recompile()
 {
     if (recompiling) return;
     recompiling = true;
-    
+    compilerErrors = "";
+
+    compilingFailed = false;
     std::cout << "Recompiling" << std::endl;
     
     if (!vertexShaderCodePath.empty())
     {
-        LoadVertexShader(vertexShaderCodePath);
+        if (!LoadVertexShader(vertexShaderCodePath))
+        {
+            compilingFailed = true;
+        }
     }
 
     if(!fragmentShaderCodePath.empty())
     {
-        LoadFragmentShader(fragmentShaderCodePath);
+        if(!LoadFragmentShader(fragmentShaderCodePath))
+        {
+            compilingFailed = true;
+        }
     }
     
     glDeleteProgram(shaderProgram);
-    Compile();
-    
+    if(!Compile())
+    {
+        compilingFailed = true;
+    }
+
     recompiling = false;
 }
 
@@ -134,7 +145,9 @@ bool ShaderManager::ReadFile(std::string path, std::string& content)
                 std::string includeContent;
                 if(!ReadFile(resolvedIncludePath, includeContent))
                 {
-                    std::cerr << "Failed loading include file: " << resolvedIncludePath << std::endl;
+                    auto message = "Failed to load include file: " + includePath + " inside: " + path;
+                    compilerErrors += message + "\n";
+                    std::cerr << message << std::endl;
                     return false;
                 }
                 

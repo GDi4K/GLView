@@ -304,6 +304,13 @@
       <SDLCheck>true</SDLCheck>
       <LinkCompiled>true</LinkCompiled>
     </ClCompile>
+    <ClCompile Include="third-party\src\imgui.cpp" />
+    <ClCompile Include="third-party\src\imgui_demo.cpp" />
+    <ClCompile Include="third-party\src\imgui_draw.cpp" />
+    <ClCompile Include="third-party\src\imgui_impl_glfw.cpp" />
+    <ClCompile Include="third-party\src\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="third-party\src\imgui_tables.cpp" />
+    <ClCompile Include="third-party\src\imgui_widgets.cpp" />
     <ClCompile Include="WindowManager.cpp" />
   </ItemGroup>
   <ItemGroup>

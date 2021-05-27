@@ -4,6 +4,9 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 #include "vectors.h"
+#include "imgui.h"
+#include "imgui_impl_glfw.h"
+#include "imgui_impl_opengl3.h"
 
 class WindowManager
 {
@@ -12,6 +15,7 @@ private:
     GLFWwindow* window = nullptr;
     int width = 0;
     int height = 0;
+    bool imguiUpdated = false;
 
 public:
     // methods
@@ -24,6 +28,8 @@ public:
     void ResizeWindow(int width, int height);
     bool ShouldReload();
     Float2 GetMousePosition();
+    void InitImGui();
+    void ShowError(std::string title, std::string message);
 
     // getters
     Int2 GetResolution()

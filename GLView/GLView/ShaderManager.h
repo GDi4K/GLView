@@ -14,8 +14,9 @@ private:
     std::string fragmentShaderCode;
     std::string vertexShaderCodePath = "";
     std::string fragmentShaderCodePath = "";
+    std::string compilerErrors = "";
     bool recompiling = false;
-    bool compilingFailed = true;
+    bool compilingFailed = false;
 
     bool ReadFile(std::string path, std::string &content);
     static std::string resolveIncludePath(std::string parentPath, std::string includePath);
@@ -36,5 +37,9 @@ public:
     bool IsCompilingFailed()
     {
         return compilingFailed;
+    }
+    std::string GetCompilingErrors()
+    {
+        return compilerErrors;
     }
 };

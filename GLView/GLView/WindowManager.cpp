@@ -1,6 +1,5 @@
 ﻿#include "WindowManager.h"
 
-#include <windows.h>
 
 WindowManager* WindowManager::current = nullptr;
 
@@ -33,6 +32,40 @@ Float2 WindowManager::GetMousePosition()
    // in GLFW origin is the top-left, but on OpenGL it's bottom left
    // So, we have to correct the y coordinates like this
    return { static_cast<float>(x), static_cast<float>(height - y) };
+}
+
+void WindowManager::InitImGui()
+{
+   // imgui
+   // Setup Dear ImGui context
+   IMGUI_CHECKVERSION();
+   ImGui::CreateContext();
+   ImGuiIO& io = ImGui::GetIO(); (void)io;
+   //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+   //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+   // Setup Dear ImGui style
+   ImGui::StyleColorsDark();
+   //ImGui::StyleColorsClassic();
+
+   // Setup Platform/Renderer backends
+   ImGui_ImplGlfw_InitForOpenGL(window, true);
+   ImGui_ImplOpenGL3_Init("#version 130");
+}
+
+void WindowManager::ShowError(std::string title, std::string message)
+{
+   imguiUpdated = true;
+   
+   const ImGuiViewport* viewport = ImGui::GetMainViewport();
+   ImGui::SetNextWindowPos(viewport->Pos);
+   ImGui::SetNextWindowSize(viewport->Size);
+   
+   ImGui::NewFrame();
+   ImGui::Begin(title.c_str());
+   ImGui::Text(message.c_str());
+   ImGui::End();
+   ImGui::Render();
 }
 
 WindowManager* WindowManager::Get()
@@ -80,6 +113,7 @@ bool WindowManager::Init(int w, int h)
 
 void WindowManager::ResetWindow()
 {
+   imguiUpdated = false;
    glClearColor(0.0f, 1.0f, 1.0f, 1.0f);
    // Add background color
    glClear(GL_COLOR_BUFFER_BIT);
@@ -87,6 +121,11 @@ void WindowManager::ResetWindow()
 
 void WindowManager::UpdateWindow()
 {
+   if (imguiUpdated)
+   {
+      ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+   }
+   
    glfwSwapBuffers(window);
    glfwPollEvents();
 
