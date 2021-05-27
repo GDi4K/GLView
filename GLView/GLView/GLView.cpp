@@ -11,7 +11,7 @@ namespace fs = std::experimental::filesystem;
 int main(int argc, char* argv[])
 {    
     WindowManager* windowManager = WindowManager::Get();
-    if(!windowManager->Init(800, 600)) return -1;
+    if(!windowManager->Init(1000, 1000)) return -1;
 
     ShaderManager shaderManager;
     if (argc == 2)
@@ -23,8 +23,9 @@ int main(int argc, char* argv[])
         if(!shaderManager.LoadVertexShader(argv[2])) return -1;
     }
 
-    //if(!shaderManager.LoadVertexShader("D:\\Tmp\\vertex.glsl")) return -1;
-    //if(!shaderManager.LoadFragmentShader("D:\\Tmp\\fragment.glsl")) return -1;
+    // if(!shaderManager.LoadVertexShader("D:\\Tmp\\vertex.glsl")) return -1;
+    // if(!shaderManager.LoadFragmentShader("D:\\Tmp\\fragment.glsl")) return -1;
+
     if(!shaderManager.Compile()) return -1;
 
     float vertices[] = {
@@ -64,19 +65,22 @@ int main(int argc, char* argv[])
     while(!windowManager->ShouldClose())
     {
         windowManager->ResetWindow();
-        shaderManager.Use();
 
-        // Assign uniforms
-        shaderManager.SetUniformFloat("u_time", glfwGetTime());
+        if (!shaderManager.IsCompilingFailed())
+        {
+            shaderManager.Use();
+            // Assign uniforms
+            shaderManager.SetUniformFloat("u_time", static_cast<float>(glfwGetTime()));
 
-        const auto res = windowManager->GetResolution();
-        shaderManager.SetUniformFloat2("u_resolution", res.x, res.y);
+            const auto res = windowManager->GetResolution();
+            shaderManager.SetUniformFloat2("u_resolution", static_cast<float>(res.x), static_cast<float>(res.y));
 
-        const auto mousePos = windowManager->GetMousePosition();
-        shaderManager.SetUniformFloat2("u_mouse", mousePos.x, mousePos.y);
+            const auto mousePos = windowManager->GetMousePosition();
+            shaderManager.SetUniformFloat2("u_mouse", mousePos.x, mousePos.y);
         
-        glBindVertexArray(VBO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+            glBindVertexArray(VBO);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);   
+        }
         
         windowManager->UpdateWindow();
 
@@ -85,5 +89,6 @@ int main(int argc, char* argv[])
             shaderManager.Recompile();
         }
     }
+    
     return 0;
 }

@@ -1,4 +1,7 @@
 ﻿#include "ShaderManager.h"
+#include <regex>
+
+#include "cwalk.h"
 
 int StringToWString(std::wstring &ws, const std::string &s)
 {
@@ -55,6 +58,7 @@ bool ShaderManager::Compile()
     const auto fragmentShader = CompileShader(GL_FRAGMENT_SHADER, fragmentShaderCode);
     if (!vertexShader || !fragmentShader)
     {
+        compilingFailed = true;
         return false;
     }
 
@@ -72,9 +76,11 @@ bool ShaderManager::Compile()
         char log[512];
         glGetProgramInfoLog(shaderProgram, sizeof(log), nullptr, log);
         std::cerr << "Shader linking failed: " << std::endl;
+        compilingFailed = true;
         return false;
     }
 
+    compilingFailed = false;
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
     
@@ -118,6 +124,23 @@ bool ShaderManager::ReadFile(std::string path, std::string& content)
     {
         while (std::getline(file, line))
         {
+            auto found = line.find("#include");
+            if(found != -1)
+            {
+                auto includePath = std::regex_replace(line, std::regex("#include"), "");
+                includePath = std::regex_replace(includePath, std::regex("[\"' ]*"), "");
+                auto resolvedIncludePath = resolveIncludePath(path, includePath);
+
+                std::string includeContent;
+                if(!ReadFile(resolvedIncludePath, includeContent))
+                {
+                    std::cerr << "Failed loading include file: " << resolvedIncludePath << std::endl;
+                    return false;
+                }
+                
+                content += includeContent + "\n";
+                continue;
+            }
             content += line + "\n";
         }
     } else
@@ -128,6 +151,18 @@ bool ShaderManager::ReadFile(std::string path, std::string& content)
     file.close();
     
     return true;
+}
+
+std::string ShaderManager::resolveIncludePath(std::string parentPath, std::string includePath)
+{
+    size_t parentDirPathLength;
+    cwk_path_get_dirname(parentPath.c_str(), & parentDirPathLength);
+    const std::string parentDirPath = parentPath.substr(0, parentDirPathLength);
+
+    char resolvedPath[1024];
+    cwk_path_join(parentDirPath.c_str(), includePath.c_str(), resolvedPath, sizeof(resolvedPath));
+
+    return resolvedPath;
 }
 
 bool ShaderManager::LoadVertexShader(std::string path)

@@ -166,15 +166,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="cwalk.c" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="GLView.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="WindowManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="cwalk.h" />
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="vectors.h" />
     <ClInclude Include="WindowManager.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="install.bat" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -15,8 +15,10 @@ private:
     std::string vertexShaderCodePath = "";
     std::string fragmentShaderCodePath = "";
     bool recompiling = false;
+    bool compilingFailed = true;
 
     bool ReadFile(std::string path, std::string &content);
+    static std::string resolveIncludePath(std::string parentPath, std::string includePath);
 
 public:
     ShaderManager();
@@ -31,4 +33,8 @@ public:
     bool SetUniformFloat2(std::string key, float v1, float v2);
     bool SetUniformFloat3(std::string key, float v1, float v2, float v3);
     bool SetUniformFloat4(std::string key, float v1, float v2, float v3, float v4);
+    bool IsCompilingFailed()
+    {
+        return compilingFailed;
+    }
 };
