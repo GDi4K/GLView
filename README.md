@@ -12,7 +12,7 @@ The source code is a self-contained Visual Studio C++ project. Just open it with
 
 ## Usage
 
-Watch this Youtube Video.
+Watch [this Youtube Video](https://youtu.be/kYudFFDg_Dw).
 
 * Double click to run the binary
 * Press `S` to Select your fragment shader & vertex shader. (Both are optional)
