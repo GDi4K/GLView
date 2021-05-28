@@ -58,11 +58,11 @@ void WindowManager::ShowError(std::string title, std::string message)
 {
    imguiUpdated = true;
    
-   const ImGuiViewport* viewport = ImGui::GetMainViewport();
-   ImGui::SetNextWindowPos(viewport->Pos);
-   ImGui::SetNextWindowSize(viewport->Size);
+   ImGui::SetNextWindowPos({0, 0});
+   ImGui::SetNextWindowSize({width + 0.0f, height + 0.0f});
    
    ImGui::NewFrame();
+   bool closeIt;
    ImGui::Begin(title.c_str());
    ImGui::Text(message.c_str());
    ImGui::End();
@@ -84,9 +84,10 @@ bool WindowManager::ShouldSelectShaders()
 void WindowManager::SelectShader(ShaderManager &shaderManager)
 {
    imguiUpdated = true;
-   const ImGuiViewport* viewport = ImGui::GetMainViewport();
-   ImGui::SetNextWindowPos(viewport->Pos);
-   ImGui::SetNextWindowSize(viewport->Size);
+   ImGui::SetNextWindowPos({0, 0});
+   ImGui::SetNextWindowSize({width + 0.0f, height + 0.0f});
+
+   std::cout << "SSSS " << width << "  " << height << std::endl;
 
    ImGui::NewFrame();
    if(ImGui::Begin("Select Shaders"))
@@ -202,11 +203,20 @@ void WindowManager::UpdateWindow()
    glfwSwapBuffers(window);
    glfwPollEvents();
 
-   // trigger to close window with the ESC key
+   // Reset all the GUI status
    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
    {
-      glfwSetWindowShouldClose(window, 1);
+      startSelectingShaders = false;
+      isVertexShaderSelected = false;
+      fileDialog.Close();
    }
+
+   // We don't need this functionality. ALT + F4 is just fine
+   // // trigger to close window with the ESC key
+   // if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+   // {
+   //    glfwSetWindowShouldClose(window, 1);
+   // }
 }
 
 bool WindowManager::ShouldClose()

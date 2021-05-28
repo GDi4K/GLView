@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
     }
 
     // shaderManager.LoadVertexShader("D:\\Tmp\\vertex.glsl");
-    // shaderManager.LoadFragmentShader("D:\\Tmp\\fragment.glsl");
+    // shaderManager.LoadFragmentShader("D:\\Tmp\\fragment.glsl"
 
     shaderManager.Recompile();
 
@@ -77,8 +77,10 @@ int main(int argc, char* argv[])
 
         if (shaderManager.IsCompilingFailed())
         {
-            windowManager->ShowError("Shader Compiler Error", shaderManager.GetCompilingErrors().c_str());
-            
+            if (!windowManager->ShouldSelectShaders())
+            {
+                windowManager->ShowError("Shader Compiler Error", shaderManager.GetCompilingErrors().c_str()); 
+            }
         } else
         {
             shaderManager.Use();
