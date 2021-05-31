@@ -2,6 +2,8 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+
+#include "Texture.h"
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 
@@ -17,6 +19,7 @@ private:
     std::string compilerErrors = "";
     bool recompiling = false;
     bool compilingFailed = false;
+    Texture textures[16];
 
     bool ReadFile(std::string path, std::string &content);
     static std::string resolveIncludePath(std::string parentPath, std::string includePath);
@@ -29,6 +32,7 @@ public:
     void Use();
     bool LoadVertexShader(std::string path);
     bool LoadFragmentShader(std::string path);
+    void AssignTextureHooks(GLuint* hooks);
     bool SetUniformInt(std::string key, int value);
     bool SetUniformFloat(std::string key, float value);
     bool SetUniformFloat2(std::string key, float v1, float v2);

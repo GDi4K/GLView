@@ -1,8 +1,9 @@
 ﻿#include "ShaderManager.h"
 #include <regex>
 #include "cwalk.h"
+#include "Texture.h"
 
-int StringToWString(std::wstring &ws, const std::string &s)
+int StringToWString(std::wstring& ws, const std::string& s)
 {
     std::wstring wsTmp(s.begin(), s.end());
 
@@ -15,9 +16,16 @@ ShaderManager::ShaderManager()
 {
     vertexShaderCode = ""
         "#version 330 core\n"
-        "layout (location = 0) in vec3 pos;\n"
+        "layout (location = 0) in vec3 aVertexPos;\n"
+        "layout (location = 1) in vec2 aTextCoords;\n"
+        ""
+        "out vec3 vertexPos;\n"
+        "out vec2 textCoords;\n"
+        ""
         "void main() {\n"
-        "   gl_Position = vec4(pos, 1.0);\n"
+        "   vertexPos = aVertexPos;\n"
+        "   textCoords = aTextCoords;\n"
+        "   gl_Position = vec4(aVertexPos, 1.0);\n"
         "};\n"
         "";
 
@@ -79,9 +87,28 @@ bool ShaderManager::Compile()
         return false;
     }
 
+    // load textures if any
+    for (int lc = 0; lc < 16; lc++)
+    {
+        auto textureInfo = &textures[lc];
+        
+        if (textureInfo->loaded) continue;
+        if (!textureInfo->assigned) continue;
+        if (!textureInfo->pathAssigned) continue;
+
+        if (!textureInfo->Load())
+        {
+            compilerErrors += std::string("Failed to load texture at: ") + textureInfo->filePath + "\n";
+            std::cout << "Failed to load texture" << std::endl;
+            return false;
+        }
+        
+        textureInfo->FreeData();
+    }
+    
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
-    
+
     return true;
 }
 
@@ -93,7 +120,7 @@ void ShaderManager::Recompile()
 
     compilingFailed = false;
     std::cout << "Recompiling" << std::endl;
-    
+
     if (!vertexShaderCodePath.empty())
     {
         if (!LoadVertexShader(vertexShaderCodePath))
@@ -102,16 +129,16 @@ void ShaderManager::Recompile()
         }
     }
 
-    if(!fragmentShaderCodePath.empty())
+    if (!fragmentShaderCodePath.empty())
     {
-        if(!LoadFragmentShader(fragmentShaderCodePath))
+        if (!LoadFragmentShader(fragmentShaderCodePath))
         {
             compilingFailed = true;
         }
     }
-    
+
     glDeleteProgram(shaderProgram);
-    if(!Compile())
+    if (!Compile())
     {
         compilingFailed = true;
     }
@@ -128,46 +155,78 @@ bool ShaderManager::ReadFile(std::string path, std::string& content)
 {
     std::ifstream file(path);
     std::string line;
-    
+
     if (file.is_open())
     {
         while (std::getline(file, line))
         {
+            // handling #includes
             auto found = line.find("#include");
-            if(found != -1)
+            if (found == 0)
             {
                 auto includePath = std::regex_replace(line, std::regex("#include"), "");
                 includePath = std::regex_replace(includePath, std::regex("[\"' ]*"), "");
                 auto resolvedIncludePath = resolveIncludePath(path, includePath);
 
                 std::string includeContent;
-                if(!ReadFile(resolvedIncludePath, includeContent))
+                if (!ReadFile(resolvedIncludePath, includeContent))
                 {
                     auto message = "Failed to load include file: " + includePath + " inside: " + path;
                     compilerErrors += message + "\n";
                     std::cerr << message << std::endl;
                     return false;
                 }
-                
+
                 content += includeContent + "\n";
+                continue;
+            }
+
+            // handling #texture
+            auto foundTexture = line.find("#texture");
+            if (foundTexture == 0)
+            {
+                auto textureInfo = std::regex_replace(line, std::regex("#texture "), "");
+                auto textureNumber = stoi(textureInfo.substr(0, 1));
+                auto texturePath = textureInfo.substr(2);
+                texturePath = std::regex_replace(texturePath, std::regex("[\"']*"), "");
+                auto resolvedTexturePath = resolveIncludePath(path, texturePath);
+
+                if (textureNumber < 16)
+                {
+                    if (textures[textureNumber].filePath.compare(resolvedTexturePath))
+                    {
+                        textures[textureNumber].filePath = resolvedTexturePath;
+                        textures[textureNumber].pathAssigned = true;
+                        textures[textureNumber].loaded = false;
+                    }
+                }
+                else
+                {
+                    auto message = "Invalid texture position on: " + path;
+                    compilerErrors += message + "\n";
+                    std::cerr << message << std::endl;
+                    return false;
+                }
+
                 continue;
             }
             content += line + "\n";
         }
-    } else
+    }
+    else
     {
         return false;
     }
 
     file.close();
-    
+
     return true;
 }
 
 std::string ShaderManager::resolveIncludePath(std::string parentPath, std::string includePath)
 {
     size_t parentDirPathLength;
-    cwk_path_get_dirname(parentPath.c_str(), & parentDirPathLength);
+    cwk_path_get_dirname(parentPath.c_str(), &parentDirPathLength);
     const std::string parentDirPath = parentPath.substr(0, parentDirPathLength);
 
     char resolvedPath[1024];
@@ -182,12 +241,12 @@ bool ShaderManager::LoadVertexShader(std::string path)
     std::cout << "Loading vertex shader at: " << path << std::endl;
     vertexShaderCode = "";
 
-    if(!ReadFile(path, vertexShaderCode))
+    if (!ReadFile(path, vertexShaderCode))
     {
         std::cerr << "Reading shader file failed!" << std::endl;
         return false;
     }
-    
+
     return true;
 }
 
@@ -197,7 +256,7 @@ bool ShaderManager::LoadFragmentShader(std::string path)
     std::cout << "Loading fragment shader at: " << path << std::endl;
     fragmentShaderCode = "";
 
-    if(!ReadFile(path, fragmentShaderCode))
+    if (!ReadFile(path, fragmentShaderCode))
     {
         std::cerr << "Reading shader file failed!" << std::endl;
         return false;
@@ -206,11 +265,21 @@ bool ShaderManager::LoadFragmentShader(std::string path)
     return true;
 }
 
+void ShaderManager::AssignTextureHooks(GLuint* hooks)
+{
+    int size = std::max<int>(16, sizeof(hooks) / sizeof(GLuint));
+    for (int lc = 0; lc < size; lc++)
+    {
+        textures[lc].textureHook = hooks[0];
+        textures[lc].assigned = true;
+    }
+}
+
 bool ShaderManager::SetUniformInt(std::string key, int value)
 {
     const auto location = glGetUniformLocation(shaderProgram, key.c_str());
     if (location == -1) return false;
-    
+
     glUniform1i(location, value);
     return true;
 }
@@ -219,7 +288,7 @@ bool ShaderManager::SetUniformFloat(std::string key, float value)
 {
     const auto location = glGetUniformLocation(shaderProgram, key.c_str());
     if (location == -1) return false;
-    
+
     glUniform1f(location, value);
     return true;
 }
@@ -228,7 +297,7 @@ bool ShaderManager::SetUniformFloat2(std::string key, float v1, float v2)
 {
     const auto location = glGetUniformLocation(shaderProgram, key.c_str());
     if (location == -1) return false;
-    
+
     glUniform2f(location, v1, v2);
     return true;
 }
@@ -237,7 +306,7 @@ bool ShaderManager::SetUniformFloat3(std::string key, float v1, float v2, float 
 {
     const auto location = glGetUniformLocation(shaderProgram, key.c_str());
     if (location == -1) return false;
-    
+
     glUniform3f(location, v1, v2, v3);
     return true;
 }
@@ -246,7 +315,7 @@ bool ShaderManager::SetUniformFloat4(std::string key, float v1, float v2, float 
 {
     const auto location = glGetUniformLocation(shaderProgram, key.c_str());
     if (location == -1) return false;
-    
+
     glUniform4f(location, v1, v2, v3, v4);
     return true;
 }
