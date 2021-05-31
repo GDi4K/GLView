@@ -320,8 +320,27 @@ bool ShaderManager::SetUniformFloat4(std::string key, float v1, float v2, float 
     return true;
 }
 
+void ShaderManager::bindTextures()
+{
+    glBindTexture(GL_TEXTURE_2D, textures[0].textureHook);
+}
+
+void ShaderManager::createTextures()
+{
+    for (int lc=0; lc<16; lc++)
+    {
+        glGenTextures(1, &(textures[0].textureHook));
+        textures[0].assigned = true;
+    }
+}
+
 void ShaderManager::Destroy()
 {
     glDeleteShader(shaderProgram);
     shaderProgram = NULL;
+
+    for (int lc=0; lc<16; lc++)
+    {
+        glDeleteTextures(1, &(textures[0].textureHook));
+    }
 }

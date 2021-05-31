@@ -54,4 +54,7 @@ public:
     {
         return vertexShaderCodePath;
     }
+
+    void bindTextures();
+    void createTextures();
 };
