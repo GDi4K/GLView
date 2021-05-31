@@ -5,8 +5,6 @@
 #include "GLFW/glfw3.h"
 #include "WindowManager.h"
 #include "ShaderManager.h"
-#include "stb_image.h"
-#include "Texture.h"
 
 namespace fs = std::experimental::filesystem;
 
@@ -16,17 +14,17 @@ int main(int argc, char* argv[])
     if(!windowManager->Init(1000, 1000)) return -1;
 
     ShaderManager shaderManager;
-    // if (argc == 2)
-    // {
-    //     if(!shaderManager.LoadFragmentShader(argv[1])) return -1;
-    // } else if (argc == 3)
-    // {
-    //     if(!shaderManager.LoadFragmentShader(argv[1])) return -1;
-    //     if(!shaderManager.LoadVertexShader(argv[2])) return -1;
-    // }
+    if (argc == 2)
+    {
+        if(!shaderManager.LoadFragmentShader(argv[1])) return -1;
+    } else if (argc == 3)
+    {
+        if(!shaderManager.LoadFragmentShader(argv[1])) return -1;
+        if(!shaderManager.LoadVertexShader(argv[2])) return -1;
+    }
 
-    shaderManager.LoadVertexShader("D:\\Tmp\\vertex.glsl");
-    shaderManager.LoadFragmentShader("D:\\Tmp\\fragment.glsl");
+    // shaderManager.LoadVertexShader("D:\\Tmp\\vertex.glsl");
+    // shaderManager.LoadFragmentShader("D:\\Tmp\\fragment.glsl");
 
     float vertices[] = {
         // vertices         // texture-coords
@@ -56,8 +54,6 @@ int main(int argc, char* argv[])
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
     shaderManager.createTextures();
-    // GLuint textures[] = {texture};
-    // shaderManager.AssignTextureHooks(textures);
     
     // set the vertex attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), nullptr);

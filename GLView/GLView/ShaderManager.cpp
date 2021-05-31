@@ -90,8 +90,8 @@ bool ShaderManager::Compile()
     // load textures if any
     for (int lc = 0; lc < 16; lc++)
     {
-        auto textureInfo = &textures[lc];
-        
+        auto textureInfo = &(textures[lc]);
+
         if (textureInfo->loaded) continue;
         if (!textureInfo->assigned) continue;
         if (!textureInfo->pathAssigned) continue;
@@ -322,15 +322,20 @@ bool ShaderManager::SetUniformFloat4(std::string key, float v1, float v2, float 
 
 void ShaderManager::bindTextures()
 {
-    glBindTexture(GL_TEXTURE_2D, textures[0].textureHook);
+    for (int lc=0; lc<16; lc++)
+    {
+        SetUniformInt("texture" + std::to_string(lc), lc);
+        glActiveTexture(GL_TEXTURE0 + lc);
+        glBindTexture(GL_TEXTURE_2D, textures[lc].textureHook);
+    }
 }
 
 void ShaderManager::createTextures()
 {
     for (int lc=0; lc<16; lc++)
     {
-        glGenTextures(1, &(textures[0].textureHook));
-        textures[0].assigned = true;
+        glGenTextures(1, &(textures[lc].textureHook));
+        textures[lc].assigned = true;
     }
 }
 
