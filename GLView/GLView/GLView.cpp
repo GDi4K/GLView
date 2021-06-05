@@ -5,6 +5,7 @@
 #include "GLFW/glfw3.h"
 #include "WindowManager.h"
 #include "ShaderManager.h"
+#include "glm/gtc/type_ptr.hpp"
 
 namespace fs = std::experimental::filesystem;
 
@@ -14,17 +15,17 @@ int main(int argc, char* argv[])
     if(!windowManager->Init(1000, 1000)) return -1;
 
     ShaderManager shaderManager;
-    if (argc == 2)
-    {
-        if(!shaderManager.LoadFragmentShader(argv[1])) return -1;
-    } else if (argc == 3)
-    {
-        if(!shaderManager.LoadFragmentShader(argv[1])) return -1;
-        if(!shaderManager.LoadVertexShader(argv[2])) return -1;
-    }
+    // if (argc == 2)
+    // {
+    //     if(!shaderManager.LoadFragmentShader(argv[1])) return -1;
+    // } else if (argc == 3)
+    // {
+    //     if(!shaderManager.LoadFragmentShader(argv[1])) return -1;
+    //     if(!shaderManager.LoadVertexShader(argv[2])) return -1;
+    // }
 
-    // shaderManager.LoadVertexShader("D:\\Tmp\\vertex.glsl");
-    // shaderManager.LoadFragmentShader("D:\\Tmp\\fragment.glsl");
+    shaderManager.LoadVertexShader("D:\\Tmp\\vertex.glsl");
+    shaderManager.LoadFragmentShader("D:\\Tmp\\fragment.glsl");
 
     float vertices[] = {
         // vertices         // texture-coords
@@ -38,6 +39,8 @@ int main(int argc, char* argv[])
         0, 1, 2,
         0, 3, 2
     };
+
+    auto transform = glm::mat4(1.f);
 
     GLuint VBO, EBO, VAO;
     glGenBuffers(1, &VBO);
@@ -85,13 +88,25 @@ int main(int argc, char* argv[])
         {
             shaderManager.Use();
             // Assign uniforms
-            shaderManager.SetUniformFloat("u_time", static_cast<float>(glfwGetTime()));
+            const auto time = static_cast<float>(glfwGetTime());
+            shaderManager.SetUniformFloat("u_time", time);
 
             const auto res = windowManager->GetResolution(); 
             shaderManager.SetUniformFloat2("u_resolution", static_cast<float>(res.x), static_cast<float>(res.y));
 
             const auto mousePos = windowManager->GetMousePosition();
             shaderManager.SetUniformFloat2("u_mouse", mousePos.x, mousePos.y);
+
+            // // Usually we do like this.
+            // // rotate -> scale -> translate
+            // // But here we do it the reverse order. That's because OpenGL uses a column vector.
+            // // more on that: https://stackoverflow.com/a/33958564
+            // transform = glm::mat4(1.0f);
+            // transform = glm::translate(transform, glm::vec3(0.5f, 0.5f, 0.0f));
+            // transform = glm::scale(transform, glm::vec3(0.5f, 0.5f, 1.0f));
+            // transform = glm::rotate(transform, time * 0.1f, glm::vec3(0.0f, 0.0f, 1.0f));
+            
+            shaderManager.SetUniformMat4("u_transform", glm::value_ptr(transform));
 
             shaderManager.bindTextures();
             glBindVertexArray(VBO);

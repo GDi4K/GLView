@@ -38,6 +38,8 @@ public:
     bool SetUniformFloat2(std::string key, float v1, float v2);
     bool SetUniformFloat3(std::string key, float v1, float v2, float v3);
     bool SetUniformFloat4(std::string key, float v1, float v2, float v3, float v4);
+    bool SetUniformMat4(std::string key, float* value_ptr);
+    
     bool IsCompilingFailed()
     {
         return compilingFailed;

@@ -320,6 +320,14 @@ bool ShaderManager::SetUniformFloat4(std::string key, float v1, float v2, float 
     return true;
 }
 
+bool ShaderManager::SetUniformMat4(std::string key, float* value_ptr)
+{
+    const auto location = glGetUniformLocation(shaderProgram, key.c_str());
+    if (location == -1) return false;
+
+    glUniformMatrix4fv(location, 1, GL_FALSE, value_ptr);
+}
+
 void ShaderManager::bindTextures()
 {
     for (int lc=0; lc<16; lc++)
